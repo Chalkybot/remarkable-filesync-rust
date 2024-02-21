@@ -10,9 +10,9 @@ struct RemarkableMetadata {
     created_time: String,
     #[serde(rename = "lastModified")]
     last_modified: String,
-    #[serde(rename = "lastOpened")]
+    #[serde(rename = "lastOpened", default)]
     last_opened: String,
-    #[serde(rename = "lastOpenedPage")]
+    #[serde(rename = "lastOpenedPage", default)]
     last_opened_page: u32,
     #[serde(rename = "visibleName")]
     visible_name: String,
@@ -79,7 +79,6 @@ impl RemarkableObj {
         for path in file_paths {
             match path.extension() { Some(t) => (), None => continue, }
             if path.extension().unwrap().to_str().unwrap() == "metadata" { 
-                println!("{:?}",&path);
                 uuid = String::from(RemarkableObj::set_file_extension(&path, "")
                                                                         .file_name()
                                                                         .unwrap()
@@ -133,11 +132,12 @@ fn main() {
     let args = Cli::parse();
     
     //let path = "/home/user/Documents/remarkable-filesync-rust/remarkable-library/";
-    let x = group_directory_contents(&args.path_to_library);
-    dbg!(&x);
-    for (key, list_of_files) in x.unwrap() { 
-        let y = RemarkableObj::new(list_of_files);
-        dbg!(y);
-
+    println!("Loading library: {:?}", &args.path_to_library);
+    let groups = group_directory_contents(&args.path_to_library);
+    
+    let mut remarkable_library = Vec::new();
+    for (key, list_of_files) in groups.unwrap() {
+        remarkable_library.push(RemarkableObj::new(list_of_files));
     }
+    println!("Library loaded with {} elements.", remarkable_library.len());
 }
